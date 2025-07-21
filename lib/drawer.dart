@@ -3,7 +3,9 @@ import 'package:try_1/class_chat_screen.dart';
 import 'package:try_1/msgs_screen.dart';
 import 'package:try_1/profile_screen.dart' hide MessagesPage;
 import 'package:try_1/settings_screen.dart';
-import 'package:try_1/splash_screen.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:try_1/login_screen.dart'; // Adjust the path if needed
+
 
 // Enum to represent the selectable sections in the drawer
 enum _DrawerSection {
@@ -220,14 +222,44 @@ class _AppDrawerState extends State<AppDrawer> {
               },
             ),
             _buildDrawerItem(
-              title: "Logout",
-              section: _DrawerSection.logout,
-              onTap: () {
-                Navigator.of(context).push(
-                  MaterialPageRoute(builder: (context) => const SplashScreen()),
-                );
-              },
-            ),
+            title: "Logout",
+            section: _DrawerSection.logout,
+            onTap: () {
+              showDialog(
+                context: context,
+                builder: (BuildContext context) {
+                  return AlertDialog(
+                    title: const Text("Confirm Logout"),
+                    content: const Text("Are you sure you want to logout?"),
+                    actions: [
+                      TextButton(
+                        onPressed: () {
+                          Navigator.of(context).pop(); // Close the dialog
+                        },
+                        child: const Text("Cancel"),
+                      ),
+                      TextButton(
+                        onPressed: () async {
+                          Navigator.of(context).pop(); // Close the dialog
+                          await FirebaseAuth.instance.signOut();
+                          Navigator.of(context).pushAndRemoveUntil(
+                            MaterialPageRoute(builder: (context) => const LoginScreen()),
+                            (route) => false,
+                          );
+                        },
+                        style: TextButton.styleFrom(
+                          backgroundColor: Colors.red,      
+                          foregroundColor: Colors.white,     
+                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                        ),
+                        child: const Text("Logout"),
+                      ),
+                    ],
+                  );
+                },
+              );
+            },
+          ),
           ],
         ),
       ),
