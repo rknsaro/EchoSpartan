@@ -8,57 +8,18 @@ import 'package:try_1/community/community_provider.dart';
 import 'dart:typed_data';
 import 'dart:convert';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:intl/intl.dart'; // Import for date formatting
 
-// A class to represent a user that can be a contact or chat participant
-class AppUser {
-  final String uid;
-  final String name;
-
-  AppUser({required this.uid, required this.name});
-
-  factory AppUser.fromFirestore(DocumentSnapshot doc) {
-    Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
-    return AppUser(
-      uid: doc.id,
-      name: data['name'] ?? 'Unknown User',
-    );
-  }
-}
-
-// Represents an overview of an active private chat for the current user
-class ChatOverview {
-  final String chatRoomId; // The ID of the document in 'private_chats'
-  final String otherParticipantId; // The UID of the other person in the chat
-  final String otherParticipantName; // The display name of the other person
-  final String? lastMessage;
-  final DateTime? lastMessageTime;
-
-  ChatOverview({
-    required this.chatRoomId,
-    required this.otherParticipantId,
-    required this.otherParticipantName,
-    this.lastMessage,
-    this.lastMessageTime,
-  });
-}
-
-// The existing Contact model (if 'contacts' collection represents a list of users)
-// This model will primarily be for the 'Suggested Contacts' section.
 class Contact {
-  final String id; // This should be the UID of the contact
+  final String id;
   final String name;
 
-  Contact({
-    required this.id,
-    required this.name,
-  });
+  Contact({required this.id, required this.name});
 
   factory Contact.fromFirestore(DocumentSnapshot doc) {
     Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
     return Contact(
-      id: doc.id, // Assuming doc.id is the user UID for the contact
-      name: data['name'] ?? 'Unknown Contact', // Assuming a 'name' field in your 'contacts' doc
+      id: doc.id,
+      name: data['name'] ?? 'Unknown Contact',
     );
   }
 }
@@ -76,11 +37,8 @@ class _MessagesPageState extends State<MessagesPage> {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
   User? _currentUser;
-  List<Contact> _allAvailableContacts = []; // List of all users from 'contacts' or 'users'
-  List<Contact> _filteredSuggestedContacts = []; // Contacts not already in a chat
-
-  List<ChatOverview> _privateChatOverviews = []; // Actual ongoing private chats
-  List<ChatOverview> _filteredPrivateChatOverviews = [];
+  List<Contact> _allAvailableContacts = [];
+  List<Contact> _filteredSuggestedContacts = [];
 
   final List<Map<String, String>> _allChannels = [
     {'name': 'Class BFA-4102', 'description': 'Lorem ipsum dolor sit amet, consectetur adipiscing elit.', 'time': '10:00 AM'},
@@ -91,7 +49,7 @@ class _MessagesPageState extends State<MessagesPage> {
   List<CommunityPreviewData> _filteredCommunities = [];
   late CommunityProvider _communityProvider;
 
-  bool _isLoadingData = true; // Unified loading state
+  bool _isLoadingData = true;
   String? _errorMessage;
 
   @override
@@ -100,7 +58,6 @@ class _MessagesPageState extends State<MessagesPage> {
     _currentUser = _auth.currentUser;
 
     if (_currentUser == null) {
-      // Handle not logged in case
       _errorMessage = "Please log in to view messages.";
       _isLoadingData = false;
     } else {
@@ -119,10 +76,7 @@ class _MessagesPageState extends State<MessagesPage> {
     });
 
     try {
-      await _fetchAvailableContacts(); // Fetch all potential chat users
-      await _listenToPrivateChats(); // Start listening to active chats
-
-      // Fetch communities (existing logic)
+      await _fetchAvailableContacts();
       await _fetchCommunitiesFromFirestore();
 
       if (mounted) {
@@ -132,7 +86,6 @@ class _MessagesPageState extends State<MessagesPage> {
         });
       }
     } catch (e) {
-      print("Error fetching initial data: $e");
       if (mounted) {
         setState(() {
           _isLoadingData = false;
@@ -145,12 +98,10 @@ class _MessagesPageState extends State<MessagesPage> {
     }
   }
 
-  // Fetches all users who can be contacts/chat partners
   Future<void> _fetchAvailableContacts() async {
     try {
-      // Assuming 'users' collection contains all user profiles
       QuerySnapshot userSnapshot = await _firestore.collection('users')
-          .where(FieldPath.documentId, isNotEqualTo: _currentUser!.uid) // Exclude current user
+          .where(FieldPath.documentId, isNotEqualTo: _currentUser!.uid)
           .get();
 
       List<Contact> fetchedContacts = userSnapshot.docs.map((doc) => Contact.fromFirestore(doc)).toList();
@@ -159,66 +110,12 @@ class _MessagesPageState extends State<MessagesPage> {
       if (mounted) {
         setState(() {
           _allAvailableContacts = fetchedContacts;
-          _filterResults(); // Update filtered contacts
+          _filterResults();
         });
       }
     } catch (e) {
-      print("Error fetching available contacts: $e");
       _errorMessage = "Failed to load available contacts.";
     }
-  }
-
-  // Listens to real-time updates for private chats involving the current user
-  Future<void> _listenToPrivateChats() async {
-    if (_currentUser == null) return;
-
-    _firestore
-        .collection('private_chats')
-        .where('participants', arrayContains: _currentUser!.uid)
-        .snapshots()
-        .listen((snapshot) async {
-      List<ChatOverview> fetchedOverviews = [];
-      for (var doc in snapshot.docs) {
-        List<dynamic> participants = doc['participants'] ?? [];
-        String otherParticipantId = participants.firstWhere((id) => id != _currentUser!.uid, orElse: () => '');
-
-        if (otherParticipantId.isNotEmpty) {
-          // Fetch the other participant's name from the 'users' collection
-          DocumentSnapshot userDoc = await _firestore.collection('users').doc(otherParticipantId).get();
-          String otherParticipantName = (userDoc.exists && userDoc.data() != null)
-              ? (userDoc.data() as Map<String, dynamic>)['name'] ?? 'Unknown User'
-              : 'Unknown User';
-
-          fetchedOverviews.add(ChatOverview(
-            chatRoomId: doc.id,
-            otherParticipantId: otherParticipantId,
-            otherParticipantName: otherParticipantName,
-            lastMessage: doc['lastMessage'] ?? 'No messages yet.',
-            lastMessageTime: (doc['lastMessageTime'] as Timestamp?)?.toDate(),
-          ));
-        }
-      }
-      fetchedOverviews.sort((a, b) {
-        if (a.lastMessageTime == null && b.lastMessageTime == null) return 0;
-        if (a.lastMessageTime == null) return 1; // Put null timestamps at the end
-        if (b.lastMessageTime == null) return -1; // Put null timestamps at the end
-        return b.lastMessageTime!.compareTo(a.lastMessageTime!); // Most recent first
-      });
-
-      if (mounted) {
-        setState(() {
-          _privateChatOverviews = fetchedOverviews;
-          _filterResults(); // Re-filter when chat overviews update
-        });
-      }
-    }, onError: (error) {
-      print("Error listening to private chats: $error");
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to load chats: ${error.toString()}')),
-        );
-      }
-    });
   }
 
   Future<void> _fetchCommunitiesFromFirestore() async {
@@ -242,7 +139,6 @@ class _MessagesPageState extends State<MessagesPage> {
       }
       _communityProvider.setCommunities(fetchedCommunities);
     } catch (e) {
-      print("Error fetching communities from Firestore: $e");
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Failed to load communities: ${e.toString()}')),
       );
@@ -253,16 +149,8 @@ class _MessagesPageState extends State<MessagesPage> {
     final query = _searchController.text.toLowerCase();
 
     setState(() {
-      // Filter existing private chats
-      _filteredPrivateChatOverviews = _privateChatOverviews.where((chat) {
-        return chat.otherParticipantName.toLowerCase().contains(query) ||
-               (chat.lastMessage?.toLowerCase().contains(query) ?? false);
-      }).toList();
-
-      // Filter suggested contacts (those not in an active chat)
       _filteredSuggestedContacts = _allAvailableContacts.where((contact) {
-        bool isAlreadyInChat = _privateChatOverviews.any((chat) => chat.otherParticipantId == contact.id);
-        return !isAlreadyInChat && contact.name.toLowerCase().contains(query);
+        return contact.name.toLowerCase().contains(query);
       }).toList();
 
       _filteredChannels = _allChannels.where((channel) {
@@ -277,23 +165,6 @@ class _MessagesPageState extends State<MessagesPage> {
         return nameMatches || introMatches;
       }).toList();
     });
-  }
-
-  String _formatLastMessageTime(DateTime? time) {
-    if (time == null) return '';
-    final now = DateTime.now();
-    final today = DateTime(now.year, now.month, now.day);
-    final messageDay = DateTime(time.year, time.month, time.day);
-
-    if (messageDay.isAtSameMomentAs(today)) {
-      return DateFormat('jm').format(time); // e.g., 1:30 PM
-    } else if (messageDay.isAtSameMomentAs(today.subtract(const Duration(days: 1)))) {
-      return 'Yesterday';
-    } else if (now.difference(time).inDays < 7) {
-      return DateFormat('EEE').format(time); // e.g., Mon, Tue
-    } else {
-      return DateFormat('MM/dd/yy').format(time); // e.g., 07/20/24
-    }
   }
 
   @override
@@ -370,46 +241,6 @@ class _MessagesPageState extends State<MessagesPage> {
                     ? Center(child: Text(_errorMessage!, style: const TextStyle(color: Colors.red)))
                     : ListView(
                         children: [
-                          // Display existing private chats first
-                          if (_searchController.text.isEmpty || _filteredPrivateChatOverviews.isNotEmpty)
-                            Padding(
-                              padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-                              child: Text(
-                                'My Conversations',
-                                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.grey[800]),
-                              ),
-                            ),
-                          ..._filteredPrivateChatOverviews.map((chat) {
-                            return Column(
-                              children: [
-                                ListTile(
-                                  leading: const CircleAvatar(
-                                    backgroundColor: Color(0xFFB00000),
-                                    child: Icon(Icons.person, color: Colors.white),
-                                  ),
-                                  title: Text(chat.otherParticipantName, style: const TextStyle(fontWeight: FontWeight.bold)),
-                                  subtitle: Text(chat.lastMessage ?? 'No messages yet.'),
-                                  trailing: Text(_formatLastMessageTime(chat.lastMessageTime)),
-                                  onTap: () {
-                                    Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                        builder: (context) => PrivateMessagesScreen(
-                                          recipientName: chat.otherParticipantName,
-                                          recipientId: chat.otherParticipantId,
-                                        ),
-                                      ),
-                                    );
-                                  },
-                                ),
-                                const Divider(height: 1, indent: 72, endIndent: 16),
-                              ],
-                            );
-                          }).toList(),
-                          if (_filteredPrivateChatOverviews.isNotEmpty) const SizedBox(height: 20),
-
-
-                          // Display Suggested Contacts (users you can initiate a chat with)
                           if (_searchController.text.isEmpty || _filteredSuggestedContacts.isNotEmpty)
                             Padding(
                               padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
@@ -428,7 +259,6 @@ class _MessagesPageState extends State<MessagesPage> {
                                   ),
                                   title: Text(contact.name, style: const TextStyle(fontWeight: FontWeight.bold)),
                                   subtitle: const Text('Start a new conversation'),
-                                  trailing: const Text(''),
                                   onTap: () {
                                     Navigator.push(
                                       context,
@@ -445,10 +275,8 @@ class _MessagesPageState extends State<MessagesPage> {
                               ],
                             );
                           }).toList(),
-                          if (_filteredSuggestedContacts.isNotEmpty) const SizedBox(height: 20),
 
-                          // Channels and Communities remain largely the same
-                          if (_searchController.text.isEmpty || _filteredChannels.isNotEmpty)
+                          if (_filteredChannels.isNotEmpty)
                             Padding(
                               padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
                               child: Text(
@@ -477,9 +305,8 @@ class _MessagesPageState extends State<MessagesPage> {
                               ],
                             );
                           }).toList(),
-                          if (_filteredChannels.isNotEmpty) const SizedBox(height: 20),
 
-                          if (_searchController.text.isEmpty || _filteredCommunities.isNotEmpty)
+                          if (_filteredCommunities.isNotEmpty)
                             Padding(
                               padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
                               child: Text(
@@ -491,9 +318,8 @@ class _MessagesPageState extends State<MessagesPage> {
                             builder: (context, communityProvider, child) {
                               final currentFilteredCommunities = communityProvider.communities.where((community) {
                                 final query = _searchController.text.toLowerCase();
-                                final bool nameMatches = community.name.toLowerCase().contains(query);
-                                final bool introMatches = community.intro.toLowerCase().contains(query);
-                                return nameMatches || introMatches;
+                                return community.name.toLowerCase().contains(query) ||
+                                    community.intro.toLowerCase().contains(query);
                               }).toList();
 
                               return Column(
@@ -517,7 +343,6 @@ class _MessagesPageState extends State<MessagesPage> {
                                         ),
                                         title: Text(community.name, style: const TextStyle(fontWeight: FontWeight.bold)),
                                         subtitle: Text('${community.memberCount} members • ${community.intro}'),
-                                        trailing: const Text(''),
                                         onTap: () {
                                           Navigator.push(
                                             context,
@@ -545,8 +370,7 @@ class _MessagesPageState extends State<MessagesPage> {
                           if (_searchController.text.isNotEmpty &&
                               _filteredSuggestedContacts.isEmpty &&
                               _filteredChannels.isEmpty &&
-                              _filteredCommunities.isEmpty &&
-                              _filteredPrivateChatOverviews.isEmpty)
+                              _filteredCommunities.isEmpty)
                             const Padding(
                               padding: EdgeInsets.all(16.0),
                               child: Center(

@@ -133,12 +133,14 @@ class _HomepageCommState extends State<HomepageComm> {
         backgroundColor: Colors.transparent,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.white),
-          onPressed: () {
-            // Navigate back to the MessagesPage (list of communities/chats)
-            Navigator.pop(context); // This will pop the current HomepageComm route off the stack
-          },
-        ),
+        icon: const Icon(Icons.arrow_back, color: Colors.white),
+        onPressed: () {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => const MessagesPage()),
+          );
+        },
+      ),
         actions: [
           IconButton(
             icon: const Icon(Icons.person_add, color: Colors.white),
