@@ -199,7 +199,6 @@ class _NewCommunityScreenState extends State<NewCommunityScreen> {
         actions: [
           TextButton(
             onPressed: () async {
-              // Prepare data to pass
               Uint8List? imageBytesToPass;
               if (kIsWeb) {
                 imageBytesToPass = _communityImageBytes;
@@ -207,7 +206,6 @@ class _NewCommunityScreenState extends State<NewCommunityScreen> {
                 imageBytesToPass = await _communityImage!.readAsBytes();
               }
 
-              // Navigate to PreviewCommunityScreen and pass data
               Navigator.push(
                 context,
                 MaterialPageRoute(

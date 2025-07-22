@@ -1,6 +1,28 @@
+// discussions_page.dart
 import 'package:flutter/material.dart';
 import 'package:try_1/drawer.dart';
 import 'package:try_1/search_screen.dart';
+import 'package:try_1/newsfeed_screen.dart';
+import 'top_forums_page.dart';
+import 'communities_page.dart';
+import 'campus_announcements_page.dart';
+
+class DiscussionsPage extends StatelessWidget {
+  const DiscussionsPage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text("Discussions"),
+        backgroundColor: const Color(0xFFB00000),
+      ),
+      body: const Center(
+        child: Text("Welcome to Discussions!"),
+      ),
+    );
+  }
+}
 
 
 List<String> allAppContacts = [
@@ -84,31 +106,43 @@ class _NewsFeedScreenState extends State<NewsFeedScreen> {
     scrollDirection: Axis.horizontal,
     child: Row(
       children: [
-         _TopTab(
-                    title: "Newsfeed",
-                    selected: selectedTab == "Newsfeed",
-                    onTap: () => setState(() => selectedTab = "Newsfeed"),
-                  ),
-                  _TopTab(
-                    title: "Discussions",
+        _TopTab(
+          title: "Newsfeed",
+          selected: selectedTab == "Newsfeed",
+          onTap: () => Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => NewsFeedScreen()),
+          ),
+        ),
+        _TopTab(
+           title: "Discussions",
                     selected: selectedTab == "Discussions",
                     onTap: () => setState(() => selectedTab = "Discussions"),
-                  ),
-                  _TopTab(
-                    title: "Top Forums",
-                    selected: selectedTab == "Top Forums",
-                    onTap: () => setState(() => selectedTab = "Top Forums"),
-                  ),
-                  _TopTab(
-                    title: "Communities",
-                    selected: selectedTab == "Communities",
-                    onTap: () => setState(() => selectedTab = "Communities"),
-                  ),
-                  _TopTab(
-                    title: "Campus Announcements",
-                    selected: selectedTab == "Campus Announcements",
-                    onTap: () => setState(() => selectedTab = "Campus Announcements"),
-                  )
+        ),
+        _TopTab(
+          title: "Top Forums",
+          selected: selectedTab == "Top Forums",
+          onTap: () => Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => TopForumsPage()),
+          ),
+        ),
+        _TopTab(
+          title: "Communities",
+          selected: selectedTab == "Communities",
+          onTap: () => Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => CommunitiesPage()),
+          ),
+        ),
+        _TopTab(
+          title: "Campus Announcements",
+          selected: selectedTab == "Campus Announcements",
+          onTap: () => Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => CampusAnnouncementsPage()),
+          ),
+        ),
       ],
     ),
   ),
@@ -183,7 +217,6 @@ class _CampusAnnouncements extends StatelessWidget {
     );
   }
 }
-
 class _DefaultNewsfeedContent extends StatelessWidget {
   const _DefaultNewsfeedContent();
 

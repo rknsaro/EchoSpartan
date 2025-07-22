@@ -38,7 +38,7 @@ class InviteNewMembersScreen extends StatefulWidget {
     required this.showAnnouncements,
     this.isInitialCreation = false,
     Set<String>? existingMembers,
-    this.communityIntro = '', // Initialize with a default value
+    this.communityIntro = '',
   }) : existingMembers = existingMembers ?? const {};
 
   @override
@@ -49,14 +49,13 @@ class _InviteNewMembersScreenState extends State<InviteNewMembersScreen> {
   final TextEditingController _messageController = TextEditingController();
   final TextEditingController _searchController = TextEditingController();
 
-  // This will now be populated from Firestore
   List<SelectableContact> _allFirestoreContacts = [];
-  List<SelectableContact> _displaySuggestedFriends = []; // This will hold the filtered contacts
+  List<SelectableContact> _displaySuggestedFriends = []; 
 
   final List<String> _newlySelectedNames = [];
 
-  bool _isLoadingContacts = true; // Loading state for Firestore contacts
-  String? _contactsErrorMessage; // Error message for Firestore contacts
+  bool _isLoadingContacts = true; 
+  String? _contactsErrorMessage; 
 
   @override
   void initState() {
@@ -112,7 +111,7 @@ class _InviteNewMembersScreenState extends State<InviteNewMembersScreen> {
     setState(() {
       // Filter Firestore contacts
       _displaySuggestedFriends = _allFirestoreContacts.where((friend) {
-        final String friendName = friend.name; // Access name from Contact object
+        final String friendName = friend.name;
         final bool isAlreadyMember = widget.existingMembers.contains(friendName);
         final bool matchesQuery = friendName.toLowerCase().contains(query);
         return !isAlreadyMember && matchesQuery;
@@ -131,8 +130,6 @@ class _InviteNewMembersScreenState extends State<InviteNewMembersScreen> {
       }
     }
   }
-
-  // Removed _toggleChannelSelection as channels are removed
 
   void _toggleFriendSelection(int index) {
     setState(() {
@@ -155,7 +152,7 @@ class _InviteNewMembersScreenState extends State<InviteNewMembersScreen> {
 
   void _sendInvitation() {
     if (widget.isInitialCreation) {
-      Set<String> initialTotalMembers = {'Community Creator'}; // Placeholder for creator
+      Set<String> initialTotalMembers = {'Community Creator'};
       initialTotalMembers.addAll(_newlySelectedNames);
 
       Navigator.pushReplacement(
@@ -178,42 +175,80 @@ class _InviteNewMembersScreenState extends State<InviteNewMembersScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: const Color(0xFFB00000),
-        foregroundColor: Colors.white,
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () {
-            if (widget.isInitialCreation) {
-              Navigator.pop(context); // Go back to prevcomm
-            } else {
-              Navigator.pop(context, []); // Pop with empty list if back button is pressed
-            }
-          },
+    appBar: AppBar(
+      backgroundColor: const Color(0xFFB00000),
+      foregroundColor: Colors.white,
+      elevation: 0,
+      leading: IconButton(
+        icon: const Icon(Icons.arrow_back),
+        onPressed: () {
+          showDialog(
+            context: context,
+            builder: (BuildContext context) {
+              return AlertDialog(
+                title: const Text('Discard Changes?'),
+                content: const Text("If you back now, your changes won't be saved."),
+                actions: <Widget>[
+                  TextButton(
+                    child: const Text('Cancel'),
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                    },
+                  ),
+                  TextButton(
+                    style: TextButton.styleFrom(
+                      backgroundColor: Colors.red,
+                    ),
+                    child: const Text(
+                      'Discard',
+                      style: TextStyle(color: Colors.white),
+                    ),
+                    onPressed: () {
+                      Navigator.of(context).pop();
+
+                      Navigator.pushReplacement(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => HomepageComm(
+                            communityName: widget.communityName,
+                            showAnnouncements: false,
+                            initialMembers: {},
+                            communityIntro: widget.communityIntro,
+                            communityImageBytes: widget.communityImageBytes,
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                ],
+              );
+            },
+          );
+        },
+      ),
+      title: const Text(
+        'Invite new members',
+        style: TextStyle(
+          color: Colors.white,
+          fontWeight: FontWeight.bold,
         ),
-        title: const Text(
-          'Invite new members',
-          style: TextStyle(
-            color: Colors.white,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        centerTitle: true,
-        actions: [
-          TextButton(
-            onPressed: _sendInvitation,
-            child: Text(
-              'Send (${_newlySelectedNames.length})',
-              style: const TextStyle(
-                color: Colors.white,
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-              ),
+      ),
+      centerTitle: true,
+      actions: [
+        TextButton(
+          onPressed: _sendInvitation,
+          child: Text(
+            'Send (${_newlySelectedNames.length})',
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
             ),
           ),
-        ],
-      ),
+        ),
+      ],
+    ),
+
       body: Padding(
         padding: const EdgeInsets.all(20.0),
         child: Column(

@@ -7,7 +7,6 @@ import 'package:try_1/chat_screen.dart'; // Import the new ChatScreen
 import 'package:try_1/msgs_screen.dart'; // This is your messages list screen
 import 'community_provider.dart';
 import 'dart:convert';
-import 'package:try_1/create_chat_screen.dart'; // Add this line
 
 class HomepageComm extends StatefulWidget {
   final String communityName;
@@ -16,7 +15,7 @@ class HomepageComm extends StatefulWidget {
   final Set<String> initialMembers;
   final String communityIntro;
 
-  final String? communityId; // Make it nullable initially
+  final String? communityId; 
 
   const HomepageComm({
     super.key,
@@ -25,7 +24,7 @@ class HomepageComm extends StatefulWidget {
     required this.showAnnouncements,
     required this.initialMembers,
     this.communityIntro = '',
-    this.communityId, // Pass existing ID if navigating back to an existing community
+    this.communityId, 
   });
 
   @override
@@ -35,17 +34,15 @@ class HomepageComm extends StatefulWidget {
 class _HomepageCommState extends State<HomepageComm> {
   late Set<String> _currentMembers;
   late CommunityProvider _communityProvider;
-  String? _currentCommunityId; // Store the ID once generated/received
+  String? _currentCommunityId; 
 
   @override
   void initState() {
     super.initState();
     _currentMembers = Set.from(widget.initialMembers);
     _communityProvider = Provider.of<CommunityProvider>(context, listen: false);
-
     _currentCommunityId = widget.communityId;
-
-    _saveCommunityToFirestore(); // Call this function to save/update community in Firestore
+    _saveCommunityToFirestore(); 
   }
 
   Future<void> _saveCommunityToFirestore() async {

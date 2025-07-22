@@ -55,25 +55,19 @@ class _SearchScreenState extends State<SearchScreen> {
     final lowerCaseQuery = query.toLowerCase();
     List<dynamic> currentResults = [];
 
-    // Access CommunityProvider for communities
-    // We use listen: false because we don't need to rebuild SearchScreen when communities change,
-    // only read the current list.
     final communityProvider = Provider.of<CommunityProvider>(context, listen: false);
 
-    // --- Search Communities ---
     final filteredCommunities = communityProvider.communities.where((community) {
       return community.name.toLowerCase().contains(lowerCaseQuery) ||
              community.intro.toLowerCase().contains(lowerCaseQuery); // Search in intro too
     }).toList();
     currentResults.addAll(filteredCommunities);
 
-    // --- Search Contacts (using the list passed to this widget) ---
     final filteredContacts = widget.allContacts.where((contact) {
       return contact.toLowerCase().contains(lowerCaseQuery);
     }).toList();
     currentResults.addAll(filteredContacts);
 
-    // --- Search Channels (using the list passed to this widget) ---
     final filteredChannels = widget.allChannels.where((channel) {
       return channel.toLowerCase().contains(lowerCaseQuery);
     }).toList();
@@ -93,17 +87,17 @@ class _SearchScreenState extends State<SearchScreen> {
           decoration: const InputDecoration(
             hintText: 'Search contacts, communities, channels...',
             hintStyle: TextStyle(color: Colors.white70),
-            border: InputBorder.none, // Remove default TextField border
+            border: InputBorder.none,
           ),
           style: const TextStyle(color: Colors.white, fontSize: 18),
-          autofocus: true, // Automatically focus the search field when screen opens
+          autofocus: true,
           cursorColor: Colors.white,
         ),
-        backgroundColor: const Color(0xFFB00000), // Your app's primary color
-        iconTheme: const IconThemeData(color: Colors.white), // Back button color
+        backgroundColor: const Color(0xFFB00000),
+        iconTheme: const IconThemeData(color: Colors.white), 
       ),
       body: Container(
-        color: const Color(0xFFB00000), // Match background color
+        color: const Color(0xFFB00000),
         child: _searchController.text.isEmpty
             ? const Center(
                 child: Text(
@@ -141,15 +135,15 @@ class _SearchScreenState extends State<SearchScreen> {
                             title: Text(item.name, style: const TextStyle(color: Colors.black87, fontWeight: FontWeight.bold)),
                             subtitle: Text('Community - ${item.memberCount} members', style: const TextStyle(color: Colors.black54)),
                             onTap: () {
-                              // Navigate to the specific community's homepage
+
                               Navigator.push(
                                 context,
                                 MaterialPageRoute(
                                   builder: (context) => HomepageComm(
                                     communityName: item.name,
                                     communityImageBytes: item.imageBytes,
-                                    showAnnouncements: true, // You might need to derive this from 'item' if it's dynamic
-                                    initialMembers: {}, // You'll likely need to fetch actual members here
+                                    showAnnouncements: true, 
+                                    initialMembers: {}, 
                                     communityIntro: item.intro,
                                   ),
                                 ),
@@ -167,14 +161,13 @@ class _SearchScreenState extends State<SearchScreen> {
                           type = 'Contact';
                           icon = const Icon(Icons.person, color: Color(0xFFB00000));
                           onTap = () {
-                            // Example: Navigate to contact profile or direct message chat
+
                             Navigator.push(context, MaterialPageRoute(builder: (context) => ProfilePage()));
                           };
                         } else if (widget.allChannels.contains(item)) {
                           type = 'Channel';
                           icon = const Icon(Icons.forum, color: Color(0xFFB00000));
                           onTap = () {
-                            // Example: Navigate to channel chat screen
                             Navigator.push(context, MaterialPageRoute(builder: (context) => const ClassChatScreen()));
                           };
                         }
@@ -195,7 +188,7 @@ class _SearchScreenState extends State<SearchScreen> {
                           );
                         }
                       }
-                      return const SizedBox.shrink(); // Fallback for unexpected types
+                      return const SizedBox.shrink();
                     },
                   ),
       ),
