@@ -15,7 +15,7 @@ class HomepageComm extends StatefulWidget {
   final Set<String> initialMembers;
   final String communityIntro;
 
-  final String? communityId; 
+  final String? communityId; // Make it nullable initially
 
   const HomepageComm({
     super.key,
@@ -24,7 +24,7 @@ class HomepageComm extends StatefulWidget {
     required this.showAnnouncements,
     required this.initialMembers,
     this.communityIntro = '',
-    this.communityId, 
+    this.communityId, // Pass existing ID if navigating back to an existing community
   });
 
   @override
@@ -34,15 +34,17 @@ class HomepageComm extends StatefulWidget {
 class _HomepageCommState extends State<HomepageComm> {
   late Set<String> _currentMembers;
   late CommunityProvider _communityProvider;
-  String? _currentCommunityId; 
+  String? _currentCommunityId; // Store the ID once generated/received
 
   @override
   void initState() {
     super.initState();
     _currentMembers = Set.from(widget.initialMembers);
     _communityProvider = Provider.of<CommunityProvider>(context, listen: false);
+
     _currentCommunityId = widget.communityId;
-    _saveCommunityToFirestore(); 
+
+    _saveCommunityToFirestore(); // Call this function to save/update community in Firestore
   }
 
   Future<void> _saveCommunityToFirestore() async {

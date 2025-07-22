@@ -2,7 +2,6 @@
 import 'package:flutter/material.dart';
 import 'dart:typed_data';
 import 'package:try_1/community/invite_mem.dart'; // Corrected import path
-import 'package:try_1/community/homepage_comm.dart'; // Already imported
 
 class PreviewCommunityScreen extends StatefulWidget {
   final Uint8List? communityImageBytes;

@@ -2,7 +2,6 @@
 import 'package:flutter/material.dart';
 import 'package:try_1/drawer.dart';
 import 'package:try_1/search_screen.dart';
-import 'package:try_1/newsfeed_screen.dart';
 import 'top_forums_page.dart';
 import 'communities_page.dart';
 import 'campus_announcements_page.dart';
