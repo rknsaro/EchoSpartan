@@ -66,18 +66,11 @@ class _ChatScreenState extends State<ChatScreen> {
     }
 
     try {
-      // --- IMPORTANT: Replace with actual Firebase Auth implementation ---
-      // final User? currentUser = FirebaseAuth.instance.currentUser;
-      // final String? currentUserId = currentUser?.uid;
-      // final String currentUserName = currentUser?.displayName ?? 'Anonymous User';
-
-      // For demonstration without actual FirebaseAuth:
-      // You'll need to pass the actual user ID and name here from your authentication
-      const String currentUserId = 'test_user_id'; // Replace with dynamic user ID
-      const String currentUserName = 'Test User'; // Replace with dynamic user name
+      const String currentUserId = 'test_user_id';
+      const String currentUserName = 'Test User'; 
       // --- End of Auth placeholder ---
 
-      if (currentUserId == null) {
+      if (currentUserId == false) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('User not logged in.')),
         );

@@ -5,10 +5,10 @@ import 'package:try_1/discussions_page.dart';
 import 'package:try_1/top_forums_page.dart';
 import 'package:try_1/communities_page.dart';
 import 'package:try_1/campus_announcements_page.dart';
-import 'package:try_1/create_post_card.dart'; // Import the new file
-import 'dart:io'; // Required for File class for non-web platforms
-import 'dart:typed_data'; // Required for Uint8List for web platforms
-import 'package:flutter/foundation.dart' show kIsWeb; // Import kIsWeb
+import 'package:try_1/create_post_card.dart';
+import 'dart:io';
+import 'dart:typed_data';
+import 'package:flutter/foundation.dart' show kIsWeb;
 
 
 List<String> allAppContacts = [
@@ -22,7 +22,9 @@ List<String> allAppChannels = [
 ];
 
 class NewsFeedScreen extends StatefulWidget {
-  const NewsFeedScreen({super.key});
+  final int initialTabIndex;
+
+  const NewsFeedScreen({super.key, this.initialTabIndex = 0});
 
   @override
   State<NewsFeedScreen> createState() => _NewsFeedScreenState();
@@ -34,7 +36,7 @@ class _NewsFeedScreenState extends State<NewsFeedScreen> with SingleTickerProvid
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 5, vsync: this);
+    _tabController = TabController(length: 5, vsync: this, initialIndex: widget.initialTabIndex);
   }
 
   @override
@@ -90,7 +92,7 @@ class _NewsFeedScreenState extends State<NewsFeedScreen> with SingleTickerProvid
         actions: [
           IconButton(
             icon: const Icon(Icons.notifications_none, color: Colors.white),
-            onPressed: () {}
+            onPressed: () {},
           ),
         ],
         bottom: TabBar(
@@ -122,7 +124,6 @@ class _NewsFeedScreenState extends State<NewsFeedScreen> with SingleTickerProvid
   }
 }
 
-
 class _DefaultNewsfeedContent extends StatefulWidget {
   const _DefaultNewsfeedContent();
 
@@ -133,12 +134,12 @@ class _DefaultNewsfeedContent extends StatefulWidget {
 class _DefaultNewsfeedContentState extends State<_DefaultNewsfeedContent> {
   final List<_PostCard> _posts = [
     const _PostCard(
-      username: 'Jane Doe - Music Enthusiasts Group',
+      username: 'Jane Doe',
       title: 'BatStateU Music Enthusiasts 🎶 – Songwriting Collab?',
       time: 'Posted 2hr ago',
       subtitle:
           'Looking for someone who writes lyrics! I’ve got melody + instrumental na. Let’s collab for the open mic night next month. DM me!\n#MusicGroup #BatStateUtalent #OpenMicNight',
-      initialUpvotes: 259,
+      initialUpvotes: 0,
     ),
     const _PostCard(
       username: 'BSCE Study Group',
@@ -149,7 +150,7 @@ class _DefaultNewsfeedContentState extends State<_DefaultNewsfeedContent> {
       initialUpvotes: 190,
     ),
     const _PostCard(
-      username: 'From Discussions',
+      username: 'From CICS Community',
       title: 'Fastest SIM in Malvar campus for hotspotting? 📶',
       time: 'Posted 5hr ago',
       subtitle:
@@ -167,11 +168,11 @@ class _DefaultNewsfeedContentState extends State<_DefaultNewsfeedContent> {
           title: postData['title']!,
           time: 'Just now',
           subtitle: postData['content']!,
-          initialUpvotes: 0,
-          imageFile: kIsWeb ? null : postData['imageFile'], // Pass File for non-web
-          imageBytes: kIsWeb ? postData['imageBytes'] : null, // Pass Bytes for web
-          pollOptions: postData['pollOptions'], // Pass poll options
-          pollEndsInDays: postData['pollEndsInDays'], // Pass poll duration
+          initialUpvotes: postData['upvotes'] ?? 0,
+          imageFile: kIsWeb ? null : postData['imageFile'],
+          imageBytes: kIsWeb ? postData['imageBytes'] : null,
+          pollOptions: postData['pollOptions'],
+          pollEndsInDays: postData['pollEndsInDays'],
         ),
       );
     });
@@ -332,8 +333,6 @@ class _PostCardState extends State<_PostCard> {
                 onOptionSelected: (index) {
                   setState(() {
                     _selectedPollOptionIndex = index;
-                    // You might want to add logic here to actually record the vote
-                    // and disable further voting on the poll.
                   });
                 },
               ),

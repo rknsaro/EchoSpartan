@@ -4,7 +4,8 @@ import 'package:try_1/msgs_screen.dart';
 import 'package:try_1/profile_screen.dart' hide MessagesPage;
 import 'package:try_1/settings_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:try_1/login_screen.dart'; // Adjust the path if needed
+import 'package:try_1/login_screen.dart';
+import 'package:try_1/newsfeed_screen.dart';
 
 
 // Enum to represent the selectable sections in the drawer
@@ -170,26 +171,23 @@ class _AppDrawerState extends State<AppDrawer> {
               child: Text("Communities", style: TextStyle(color: Colors.white70)),
             ),
             _buildDrawerItem(
-              title: "BFA",
-              section: _DrawerSection.bfa,
-              onTap: () {
-                // Add navigation or action for BFA community
-              },
-            ),
-            _buildDrawerItem(
-              title: "Malvar Campus",
-              section: _DrawerSection.malvarCampus,
-              onTap: () {
-                // Add navigation or action for Malvar Campus community
-              },
-            ),
+            title: "CICS Community",
+            section: _DrawerSection.bfa,
+            onTap: () {
+              Navigator.of(context).pushReplacement(
+                MaterialPageRoute(
+                  builder: (context) => const NewsFeedScreen(initialTabIndex: 3),
+                ),
+              );
+            },
+          ),
             const Divider(color: Colors.white70),
             const Padding(
               padding: EdgeInsets.only(left: 8.0),
               child: Text("Channels", style: TextStyle(color: Colors.white70)),
             ),
             _buildDrawerItem(
-              title: "Class BFA-4102",
+              title: "Class SM-4102",
               section: _DrawerSection.classBFA4102,
               onTap: () {
                 Navigator.of(context).push(
@@ -197,20 +195,13 @@ class _AppDrawerState extends State<AppDrawer> {
                 );
               },
             ),
-            _buildDrawerItem(
-              title: "Study Buddies",
-              section: _DrawerSection.studyBuddies,
-              onTap: () {
-                // Add navigation or action for Study Buddies channel
-              },
-            ),
-            _buildDrawerItem(
-              title: "Drama Club",
-              section: _DrawerSection.dramaClub,
-              onTap: () {
-                // Add navigation or action for Drama Club channel
-              },
-            ),
+            // _buildDrawerItem(
+            //   title: "Drama Club",
+            //   section: _DrawerSection.dramaClub,
+            //   onTap: () {
+            //     // Add navigation or action for Drama Club channel
+            //   },
+            // ),
             const Divider(color: Colors.white70),
             _buildDrawerItem(
               title: "Settings",

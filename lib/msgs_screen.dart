@@ -8,6 +8,7 @@ import 'package:try_1/community/community_provider.dart';
 import 'dart:typed_data';
 import 'dart:convert';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:try_1/class_chat_screen.dart';
 
 class Contact {
   final String id;
@@ -41,8 +42,7 @@ class _MessagesPageState extends State<MessagesPage> {
   List<Contact> _filteredSuggestedContacts = [];
 
   final List<Map<String, String>> _allChannels = [
-    {'name': 'Class BFA-4102', 'description': 'Lorem ipsum dolor sit amet, consectetur adipiscing elit.', 'time': '10:00 AM'},
-    {'name': 'Flutter Devs', 'description': 'Discussions about Flutter development.', 'time': 'Yesterday'},
+    {'name': 'Class SM-4102', 'description': 'Lorem ipsum dolor sit amet, consectetur adipiscing elit.', 'time': '10:00 AM'},
   ];
   List<Map<String, String>> _filteredChannels = [];
 
@@ -274,7 +274,7 @@ class _MessagesPageState extends State<MessagesPage> {
                                 const Divider(height: 1, indent: 72, endIndent: 16),
                               ],
                             );
-                          }).toList(),
+                          }),
 
                           if (_filteredChannels.isNotEmpty)
                             Padding(
@@ -296,10 +296,19 @@ class _MessagesPageState extends State<MessagesPage> {
                                   subtitle: Text(channel['description']!),
                                   trailing: Text(channel['time']!),
                                   onTap: () {
+                                  if (channel['name'] == 'Class SM-4102') {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(builder: (context) => const ClassChatScreen()),
+                                    );
+                                  } else {
                                     ScaffoldMessenger.of(context).showSnackBar(
                                       SnackBar(content: Text('Tapped on channel: ${channel['name']}')),
                                     );
-                                  },
+                                  }
+                                },
+
+
                                 ),
                                 const Divider(height: 1, indent: 72, endIndent: 16),
                               ],

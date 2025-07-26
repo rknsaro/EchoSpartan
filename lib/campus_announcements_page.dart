@@ -1,18 +1,25 @@
+
+
 import 'package:flutter/material.dart';
 
-class _PostOption extends StatelessWidget {
+class _PostOption extends StatefulWidget {
   final IconData icon;
   final String label;
 
   const _PostOption({required this.icon, required this.label});
 
   @override
+  State<_PostOption> createState() => _PostOptionState();
+}
+
+class _PostOptionState extends State<_PostOption> {
+  @override
   Widget build(BuildContext context) {
     return Column(
       children: [
-        Icon(icon, color: Colors.red, size: 24),
+        Icon(widget.icon, color: Colors.red, size: 24),
         const SizedBox(height: 4),
-        Text(label, style: const TextStyle(fontSize: 12)),
+        Text(widget.label, style: const TextStyle(fontSize: 12)),
       ],
     );
   }

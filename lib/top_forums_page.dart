@@ -1,16 +1,13 @@
 // top_forums_page.dart
 import 'package:flutter/material.dart';
 
-// Enum to keep track of the vote status for each post
 enum VoteStatus {
   upvoted,
   downvoted,
   none,
 }
 
-// --- _PostOption class ---
-// This widget is used to display interaction options like comments and share.
-// It remains stateless as its display doesn't change based on user interaction.
+// ignore: unused_element
 class _PostOption extends StatelessWidget {
   final IconData icon;
   final String label;
@@ -36,7 +33,7 @@ class _PostCard extends StatefulWidget {
   final String title;
   final String time;
   final String subtitle;
-  final int initialUpvotes; // The starting number of upvotes for the post
+  final int initialUpvotes; // Still an int for calculations
 
   const _PostCard({
     required this.username,
@@ -61,6 +58,16 @@ class _PostCardState extends State<_PostCard> {
     // Initialize the current upvotes with the value passed from the parent widget
     _currentUpvotes = widget.initialUpvotes;
   }
+
+  // Helper to format large numbers with 'K'
+  String _formatUpvotes(int upvotes) {
+    if (upvotes >= 1000) {
+      // Divide by 1000 and format to one decimal place if needed, then add 'K'
+      return '${(upvotes / 1000.0).toStringAsFixed(upvotes % 1000 == 0 ? 0 : 1)}K';
+    }
+    return upvotes.toString();
+  }
+
 
   // Handles the logic when the upvote arrow is tapped
   void _upvote() {
@@ -102,6 +109,10 @@ class _PostCardState extends State<_PostCard> {
 
   @override
   Widget build(BuildContext context) {
+    // Determine arrow colors based on vote status
+    Color upArrowColor = _voteStatus == VoteStatus.upvoted ? Colors.red : Colors.black;
+    Color downArrowColor = _voteStatus == VoteStatus.downvoted ? Colors.red : Colors.black;
+
     return Card(
       elevation: 2,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -159,14 +170,13 @@ class _PostCardState extends State<_PostCard> {
                       child: Icon(
                         Icons.arrow_upward,
                         size: 16,
-                        // Change color to blue if currently upvoted, otherwise black
-                        color: _voteStatus == VoteStatus.upvoted
-                            ? Colors.red : Colors.black,
+                        // Change color to red if currently upvoted, otherwise black
+                        color: upArrowColor,
                       ),
                     ),
                     const SizedBox(width: 4),
-                    // Display the current upvote count
-                    Text('$_currentUpvotes'),
+                    // Display the current upvote count using the formatter
+                    Text(_formatUpvotes(_currentUpvotes)), // <--- USING FORMATTER HERE
                     const SizedBox(width: 4),
                     // Downvote arrow with GestureDetector for tap detection
                     GestureDetector(
@@ -174,9 +184,8 @@ class _PostCardState extends State<_PostCard> {
                       child: Icon(
                         Icons.arrow_downward,
                         size: 16,
-                        // Change color to blue if currently downvoted, otherwise black
-                        color: _voteStatus == VoteStatus.downvoted
-                            ? Colors.red : Colors.black,
+                        // Change color to red if currently downvoted, otherwise black
+                        color: downArrowColor,
                       ),
                     ),
                   ],
@@ -216,58 +225,47 @@ class TopForumsPage extends StatelessWidget {
     return ListView(
       padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
       children: const [
-        // Post 1: BSCS Forum - Merge Sort
-        _PostCard(
-          username: '[BSCS Forum]',
-          title: 'Need Help Understanding Merge Sort Recursion 😭',
-          time: 'Posted 1hr ago',
-          subtitle:
-              'Okay legit, I thought I got it... until I tried tracing it manually. Can someone explain merge sort recursion in the simplest way possible? Like pang Grade 5 explanation haha.\n#BSCS #DataStructures #CodingHelp #BatStateU',
-          initialUpvotes: 7400, // Initial upvote count
-        ),
-        SizedBox(height: 12),
-
-        // Post 2: BSAIS Forum - Auditing and Assurance
-        _PostCard(
-          username: '[BSAIS Forum]',
-          title: 'What\'s the Difference Between Auditing and Assurance?',
-          time: 'Posted 2hr ago',
-          subtitle:
-              'Our prof explained it kanina, pero medyo sabog pa rin ako 😅 Anyone got a simple comparison or cheat sheet for this?\n#BSAIS #Auditing101 #AccountingHelp #BatStateU',
-          initialUpvotes: 6200, // Initial upvote count
-        ),
-        SizedBox(height: 12),
-
-        // Post 3: BSME Forum - Thermodynamics Quiz
-        _PostCard(
-          username: '[BSME Forum]',
-          title: 'Thermodynamics Quiz Was Brutal 😩',
-          time: 'Posted 3hr ago',
-          subtitle:
-              'Walang reviewer na nakatulong. Sino pa nandito na feeling drained after that quiz? Share your reviewer links pls.\n#BSME #ThermoStruggles #EngineeringLife #BatStateU',
-          initialUpvotes: 5800, // Initial upvote count
-        ),
-        SizedBox(height: 12),
-
-        // Post 4: BSN Forum - Drug Classifications
-        _PostCard(
-          username: '[BSN Forum]',
-          title: 'Best Way to Memorize Drug Classifications?',
-          time: 'Posted 4hr ago',
-          subtitle:
-              'Mga ka-nursing, paano niyo minimemorize ang pharma classifications without crying? I need hacks, songs, mnemonics... anything.\n#BSN #Pharmacology #StudyTips #BatStateU',
-          initialUpvotes: 6700, // Initial upvote count
-        ),
-        SizedBox(height: 12),
-
-        // Post 5: BSIT Forum - Capstone Title Suggestions
+        // Post 1: BSIT Forum - Firebase Authentication
         _PostCard(
           username: '[BSIT Forum]',
-          title: 'Capstone Title Suggestions? 👀',
-          time: 'Posted 5hr ago',
+          title: 'Need Help sa Firebase Authentication 😭',
+          time: 'Posted 1hr ago',
           subtitle:
-              'Wala pa rin kaming finalized title. Anyone here doing something about local businesses or mobile apps? Let’s share ideas and help each other.\n#BSIT #Capstone2025 #CICS #ProjectIdeas #BatStateU',
-          initialUpvotes: 7900, // Initial upvote count
+              'Sinunod ko na ‘yung tutorial pero ayaw pa rin mag-login! May nagsucceed na ba dito? Baka may checklist kayo ng dapat i-double check?\n#BSIT #FirebaseFail #HelpPo #BatStateU',
+          initialUpvotes: 7200, // Passed as raw number
+        ),
+        SizedBox(height: 12),
+
+        // Post 2: BSPSY Forum - Sigmund Freud
+        _PostCard(
+          username: '[BSPSY Forum]',
+          title: 'Sigmund Freud o Chismis King? 🤯',
+          time: 'Posted 2hr ago',
+          subtitle:
+              'Legit question: Napapaisip ako if Freud was genius or just wild AF. ‘Yung mga theory niya minsan parang soap opera. Thoughts?\n#BSPSY #FreudFeels #PsychTalk #BatStateU',
+          initialUpvotes: 6800, // Passed as raw number
+        ),
+        SizedBox(height: 12),
+
+        // Post 3: BSIT Forum - OOP Concepts
+        _PostCard(
+          username: '[BSIT Forum]',
+          title: 'OOP Concepts Na Mas Masakit Pa sa Breakup 💔',
+          time: 'Posted 3hr ago',
+          subtitle:
+              'Encapsulation? Polymorphism? Inheritance? Bro, minsan ‘di ko alam kung programming pa ba ‘to o pang-MMK.\n#BSIT #OOPHeartbreak #AralMuna #BatStateU',
+          initialUpvotes: 6300, // Passed as raw number
+        ),
+        SizedBox(height: 12),
+
+        // Post 4: BSIT Forum - Debugging
+        _PostCard(
+          username: '[BSIT Forum]',
+          title: 'Debugging Until 3AM Club, Asan Na Kayo?',
+          time: 'Posted 4hr ago',
+          subtitle:
+              'Yung tipong simple semicolon lang pala kulang pero inabot ka ng dalawang oras hanapin. Share niyo worst bug experience niyo 😭\n#BSIT #DebuggingDiaries #SleeplessCoders #BatStateU',
+          initialUpvotes: 7600, // Passed as raw number
         ),
         SizedBox(height: 12),
       ],

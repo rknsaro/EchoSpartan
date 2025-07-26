@@ -4,6 +4,7 @@ import 'dart:io';
 import 'dart:typed_data';
 import 'package:flutter/foundation.dart' show kIsWeb; // Import kIsWeb
 
+
 class CreatePostCard extends StatefulWidget {
   final ValueChanged<Map<String, dynamic>> onPostCreated;
 
@@ -99,17 +100,19 @@ class _CreatePostCardState extends State<CreatePostCard> {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(10.0),
           ),
-          contentPadding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 20.0),
+          contentPadding:
+              const EdgeInsets.symmetric(horizontal: 24.0, vertical: 20.0),
           title: const Text(
             'Discard post submission?',
             style: TextStyle(
               fontWeight: FontWeight.bold,
               color: Colors.black,
-              fontSize: 20, // Adjusted font size
+              fontSize: 18, // Adjusted font size
             ),
             textAlign: TextAlign.center, // Centered title
           ),
-          actionsPadding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 10.0),
+          actionsPadding:
+              const EdgeInsets.symmetric(horizontal: 20.0, vertical: 10.0),
           actionsAlignment: MainAxisAlignment.center, // Center the buttons
           actions: <Widget>[
             TextButton(
@@ -118,9 +121,11 @@ class _CreatePostCardState extends State<CreatePostCard> {
               },
               style: TextButton.styleFrom(
                 foregroundColor: const Color(0xFFB00000), // Red text for Cancel
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(25), // Rounded corners for button
+                  borderRadius:
+                      BorderRadius.circular(25), // Rounded corners for button
                 ),
               ),
               child: const Text(
@@ -137,13 +142,15 @@ class _CreatePostCardState extends State<CreatePostCard> {
                 backgroundColor: const Color(0xFFB00000), // Red background
                 foregroundColor: Colors.white, // White text
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(25), // Rounded corners for button
+                  borderRadius:
+                      BorderRadius.circular(25), // Rounded corners for button
                 ),
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
               ),
               child: const Text(
                 'Discard',
-                style: TextStyle(fontSize: 16), // Adjusted font size
+                style: TextStyle(fontSize: 16),
               ),
             ),
           ],
@@ -170,7 +177,7 @@ class _CreatePostCardState extends State<CreatePostCard> {
         return StatefulBuilder(
           builder: (BuildContext context, StateSetter modalSetState) {
             return Container(
-              height: MediaQuery.of(context).size.height * 0.95,
+              height: MediaQuery.of(context).size.height * 0.80,
               decoration: const BoxDecoration(
                 color: Colors.white,
                 borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
@@ -185,9 +192,10 @@ class _CreatePostCardState extends State<CreatePostCard> {
                         IconButton(
                           icon: const Icon(Icons.close, color: Colors.black),
                           onPressed: () async {
-                            final shouldDiscard = await _showDiscardConfirmationDialog(context);
+                            final shouldDiscard =
+                                await _showDiscardConfirmationDialog(context);
                             if (shouldDiscard == true) {
-                              Navigator.of(context).pop(); // Pop the bottom sheet
+                              Navigator.of(context).pop();
                             }
                           },
                         ),
@@ -222,7 +230,8 @@ class _CreatePostCardState extends State<CreatePostCard> {
                               if (pollOptions.length < 2) {
                                 ScaffoldMessenger.of(context).showSnackBar(
                                   const SnackBar(
-                                    content: Text('A poll needs at least two options!'),
+                                    content:
+                                        Text('A poll needs at least two options!'),
                                     backgroundColor: Colors.red,
                                   ),
                                 );
@@ -235,6 +244,7 @@ class _CreatePostCardState extends State<CreatePostCard> {
                                 'content': _contentController.text,
                                 'pollOptions': pollOptions,
                                 'pollEndsInDays': _pollEndsInDays,
+                                'upvotes': 0, // Initialize upvotes to 0 for polls
                               });
                             } else {
                               Navigator.of(context).pop({
@@ -242,6 +252,7 @@ class _CreatePostCardState extends State<CreatePostCard> {
                                 'content': _contentController.text,
                                 'imageFile': _selectedImage,
                                 'imageBytes': _selectedImageBytes,
+                                'upvotes': 0, // Initialize upvotes to 0 for regular posts
                               });
                             }
                           },
