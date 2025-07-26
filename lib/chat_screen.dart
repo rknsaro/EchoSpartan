@@ -52,8 +52,7 @@ class _ChatScreenState extends State<ChatScreen> {
           .doc(widget.chatRoomId)
           .collection('messages');
     } else {
-      // Fallback or error handling for unknown chat types
-      print('Warning: Unknown chat type provided: ${widget.chatType}. Defaulting to community messages path.');
+      ('Warning: Unknown chat type provided: ${widget.chatType}. Defaulting to community messages path.');
       _messagesCollection = _firestore
           .collection('communities') // Default fallback
           .doc(widget.chatRoomId)

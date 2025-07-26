@@ -197,7 +197,7 @@ class _InviteNewMembersScreenState extends State<InviteNewMembersScreen> {
                   ),
                   TextButton(
                     style: TextButton.styleFrom(
-                      backgroundColor: Colors.red,
+                    backgroundColor: const Color(0xFFB00000),
                     ),
                     child: const Text(
                       'Discard',

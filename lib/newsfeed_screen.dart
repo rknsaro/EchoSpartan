@@ -1,6 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:try_1/drawer.dart';
 import 'package:try_1/search_screen.dart';
+import 'package:try_1/discussions_page.dart';
+import 'package:try_1/top_forums_page.dart';
+import 'package:try_1/communities_page.dart';
+import 'package:try_1/campus_announcements_page.dart';
+import 'package:try_1/create_post_card.dart'; // Import the new file
+import 'dart:io'; // Required for File class for non-web platforms
+import 'dart:typed_data'; // Required for Uint8List for web platforms
+import 'package:flutter/foundation.dart' show kIsWeb; // Import kIsWeb
 
 
 List<String> allAppContacts = [
@@ -20,14 +28,26 @@ class NewsFeedScreen extends StatefulWidget {
   State<NewsFeedScreen> createState() => _NewsFeedScreenState();
 }
 
-class _NewsFeedScreenState extends State<NewsFeedScreen> {
-  String selectedTab = "Newsfeed";
+class _NewsFeedScreenState extends State<NewsFeedScreen> with SingleTickerProviderStateMixin {
+  late TabController _tabController;
+
+  @override
+  void initState() {
+    super.initState();
+    _tabController = TabController(length: 5, vsync: this);
+  }
+
+  @override
+  void dispose() {
+    _tabController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFB00000),
-      drawer: const AppDrawer(), // Use the extracted AppDrawer widget
+      drawer: const AppDrawer(),
       appBar: AppBar(
         backgroundColor: const Color(0xFFB00000),
         elevation: 0,
@@ -37,15 +57,14 @@ class _NewsFeedScreenState extends State<NewsFeedScreen> {
             onPressed: () => Scaffold.of(context).openDrawer(),
           ),
         ),
-        title: GestureDetector( // Wrap the TextField in a GestureDetector
+        title: GestureDetector(
           onTap: () {
-            // Navigate to the SearchScreen when the search bar is tapped
             Navigator.push(
               context,
               MaterialPageRoute(
                 builder: (context) => SearchScreen(
-                  allContacts: allAppContacts, // Pass your actual contacts data
-                  allChannels: allAppChannels, // Pass your actual channels data
+                  allContacts: allAppContacts,
+                  allChannels: allAppChannels,
                 ),
               ),
             );
@@ -56,7 +75,7 @@ class _NewsFeedScreenState extends State<NewsFeedScreen> {
               color: Colors.white,
               borderRadius: BorderRadius.circular(20),
             ),
-            child: const AbsorbPointer( // Prevents the TextField from being directly editable
+            child: const AbsorbPointer(
               child: TextField(
                 decoration: InputDecoration(
                   hintText: 'Search',
@@ -74,241 +93,197 @@ class _NewsFeedScreenState extends State<NewsFeedScreen> {
             onPressed: () {}
           ),
         ],
+        bottom: TabBar(
+          controller: _tabController,
+          isScrollable: true,
+          labelColor: Colors.white,
+          unselectedLabelColor: Colors.white70,
+          indicatorColor: Colors.white,
+          tabs: const [
+            Tab(text: 'Newsfeed'),
+            Tab(text: 'Discussions'),
+            Tab(text: 'Top Forums'),
+            Tab(text: 'Communities'),
+            Tab(text: 'Campus Announcements'),
+          ],
+        ),
       ),
-      body: Column(
-        children: [
-          Container(
-  padding: const EdgeInsets.symmetric(horizontal: 8),
-  color: const Color(0xFFB00000),
-  child: SingleChildScrollView(
-    scrollDirection: Axis.horizontal,
-    child: Row(
-      children: [
-         _TopTab(
-                    title: "Newsfeed",
-                    selected: selectedTab == "Newsfeed",
-                    onTap: () => setState(() => selectedTab = "Newsfeed"),
-                  ),
-                  _TopTab(
-                    title: "Discussions",
-                    selected: selectedTab == "Discussions",
-                    onTap: () => setState(() => selectedTab = "Discussions"),
-                  ),
-                  _TopTab(
-                    title: "Top Forums",
-                    selected: selectedTab == "Top Forums",
-                    onTap: () => setState(() => selectedTab = "Top Forums"),
-                  ),
-                  _TopTab(
-                    title: "Communities",
-                    selected: selectedTab == "Communities",
-                    onTap: () => setState(() => selectedTab = "Communities"),
-                  ),
-                  _TopTab(
-                    title: "Campus Announcements",
-                    selected: selectedTab == "Campus Announcements",
-                    onTap: () => setState(() => selectedTab = "Campus Announcements"),
-                  )
-      ],
-    ),
-  ),
-),
-
-          Expanded(
-            child: selectedTab == "Campus Announcements"
-                ? const _CampusAnnouncements()
-                : const _DefaultNewsfeedContent(),
-          ),
+      body: TabBarView(
+        controller: _tabController,
+        children: const [
+          _DefaultNewsfeedContent(),
+          DiscussionsPage(),
+          TopForumsPage(),
+          CommunitiesPage(),
+          CampusAnnouncementsPage(),
         ],
       ),
     );
   }
 }
 
-class _TopTab extends StatelessWidget {
-  final String title;
-  final bool selected;
-  final VoidCallback onTap;
 
-  const _TopTab({required this.title, this.selected = false, required this.onTap});
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 10),
-        child: Text(
-          title,
-          style: TextStyle(
-            color: selected ? Colors.white : Colors.white70,
-            fontWeight: selected ? FontWeight.bold : FontWeight.normal,
-            decoration: selected ? TextDecoration.underline : TextDecoration.none,
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _CampusAnnouncements extends StatelessWidget {
-  const _CampusAnnouncements();
-
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: Card(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        margin: const EdgeInsets.all(20),
-        child: SizedBox(
-          width: 300,
-          height: 150,
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: const [
-              Padding(
-                padding: EdgeInsets.only(top: 12),
-                child: Text(
-                  'BatStateU Updates',
-                  style: TextStyle(fontWeight: FontWeight.bold),
-                ),
-              ),
-              Divider(thickness: 1, indent: 30, endIndent: 30),
-              SizedBox(height: 10),
-              Text('+ See More', style: TextStyle(color: Colors.grey)),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _DefaultNewsfeedContent extends StatelessWidget {
+class _DefaultNewsfeedContent extends StatefulWidget {
   const _DefaultNewsfeedContent();
 
   @override
-  Widget build(BuildContext context) {
-    return Column(
-      children: [
-        Card(
-          margin: const EdgeInsets.all(16),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
-            child: Column(
-              children: [
-                const TextField(
-                  decoration: InputDecoration(
-                    hintText: "What’s on your mind?",
-                    border: InputBorder.none,
-                  ),
-                ),
-                const SizedBox(height: 10),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceAround,
-                  children: const [
-                    _PostOption(icon: Icons.person, label: 'Create Post'),
-                    _PostOption(icon: Icons.link, label: 'Link'),
-                    _PostOption(icon: Icons.poll, label: 'Poll'),
-                  ],
-                ),
-              ],
-            ),
-          ),
-        ),
-Expanded(
-  child: ListView(
-    padding: const EdgeInsets.symmetric(horizontal: 16),
-    children: const [
-      _PostCard(
-        username: 'Hot Maria Clara - CICS Community',
-        title: 'Anyone Else Obsessed with the CICS Hoodie?? 🔥',
-        time: 'Posted 1hr ago',
-        subtitle:
-            'Got mine yesterday and ang ganda ng tela, legit. May restock kaya? Sana open ulit for late orders pls 🙏\n#CICS #OrgMerch #BatStateUSwag',
-        upvotes: 173,
-      ),
-      SizedBox(height: 12),
-      _PostCard(
-        username: 'Jane Doe - Music Enthusiasts Group',
-        title: 'BatStateU Music Enthusiasts 🎶 – Songwriting Collab?',
-        time: 'Posted 2hr ago',
-        subtitle:
-            'Looking for someone who writes lyrics! I’ve got melody + instrumental na. Let’s collab for the open mic night next month. DM me!\n#MusicGroup #BatStateUtalent #OpenMicNight',
-        upvotes: 259,
-      ),
-      SizedBox(height: 12),
-      _PostCard(
-        username: 'BSCE Study Group',
-        title: 'Group Study Sesh – Saturday at Library Garden Tables!',
-        time: 'Posted 3hr ago',
-        subtitle:
-            'Hi sa mga nasa BSCE Study Group! Let’s review together for Structural Analysis. Bring your notes, reviewers, and snacks. Start tayo ng 1PM sharp.\n#BSCE #StudyGroup #StudyTogether',
-        upvotes: 190,
-      ),
-      SizedBox(height: 12),
-      _PostCard(
-        username: 'Campus Announcements',
-        title: 'Thesis Formatting Guide (APA 7th Ed.) Shared by RGO 📄',
-        time: 'Posted 4hr ago',
-        subtitle:
-            'For anyone doing thesis this sem, the Research and Graduate Office just uploaded updated guidelines and templates. Download via Student Portal under \'Downloads\'.\n#ThesisHelp #RGO #AcademicResources',
-        upvotes: 581,
-      ),
-      SizedBox(height: 12),
-      _PostCard(
-        username: 'From Discussions',
-        title: 'Fastest SIM in Malvar campus for hotspotting? 📶',
-        time: 'Posted 5hr ago',
-        subtitle:
-            'Legit tanong: ano pinaka okay na SIM for hotspot sa Malvar? Globe minsan okay, minsan wala. Smart? DITO? I need stable data lalo na sa CICS labs.',
-        upvotes: 234,
-      ),
-    ],
-  ),
-),
-
-
-      ],
-    );
-  }
+  State<_DefaultNewsfeedContent> createState() => _DefaultNewsfeedContentState();
 }
 
-class _PostOption extends StatelessWidget {
-  final IconData icon;
-  final String label;
+class _DefaultNewsfeedContentState extends State<_DefaultNewsfeedContent> {
+  final List<_PostCard> _posts = [
+    const _PostCard(
+      username: 'Jane Doe - Music Enthusiasts Group',
+      title: 'BatStateU Music Enthusiasts 🎶 – Songwriting Collab?',
+      time: 'Posted 2hr ago',
+      subtitle:
+          'Looking for someone who writes lyrics! I’ve got melody + instrumental na. Let’s collab for the open mic night next month. DM me!\n#MusicGroup #BatStateUtalent #OpenMicNight',
+      initialUpvotes: 259,
+    ),
+    const _PostCard(
+      username: 'BSCE Study Group',
+      title: 'Group Study Sesh – Saturday at Library Garden Tables!',
+      time: 'Posted 3hr ago',
+      subtitle:
+          'Hi sa mga nasa BSCE Study Group! Let’s review together for Structural Analysis. Bring your notes, reviewers, and snacks. Start tayo ng 1PM sharp.\n#BSCE #StudyGroup #StudyTogether',
+      initialUpvotes: 190,
+    ),
+    const _PostCard(
+      username: 'From Discussions',
+      title: 'Fastest SIM in Malvar campus for hotspotting? 📶',
+      time: 'Posted 5hr ago',
+      subtitle:
+          'Legit tanong: ano pinaka okay na SIM for hotspot sa Malvar? Globe minsan okay, minsan wala. Smart? DITO? I need stable data lalo na sa CICS labs.',
+      initialUpvotes: 234,
+    ),
+  ];
 
-  const _PostOption({required this.icon, required this.label});
+  void _addNewPost(Map<String, dynamic> postData) {
+    setState(() {
+      _posts.insert(
+        0,
+        _PostCard(
+          username: 'You',
+          title: postData['title']!,
+          time: 'Just now',
+          subtitle: postData['content']!,
+          initialUpvotes: 0,
+          imageFile: kIsWeb ? null : postData['imageFile'], // Pass File for non-web
+          imageBytes: kIsWeb ? postData['imageBytes'] : null, // Pass Bytes for web
+          pollOptions: postData['pollOptions'], // Pass poll options
+          pollEndsInDays: postData['pollEndsInDays'], // Pass poll duration
+        ),
+      );
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     return Column(
       children: [
-        Icon(icon, color: Colors.red, size: 24),
-        const SizedBox(height: 4),
-        Text(label, style: const TextStyle(fontSize: 12)),
+        CreatePostCard(onPostCreated: _addNewPost),
+        Expanded(
+          child: ListView.builder(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            itemCount: _posts.length,
+            itemBuilder: (context, index) {
+              return Column(
+                children: [
+                  _posts[index],
+                  const SizedBox(height: 12),
+                ],
+              );
+            },
+          ),
+        ),
       ],
     );
   }
 }
 
-class _PostCard extends StatelessWidget {
+// Define an enum to represent the user's vote status for a post
+enum _VoteStatus {
+  none,       
+  upvoted,    
+  downvoted,  
+}
+
+class _PostCard extends StatefulWidget {
   final String username;
   final String title;
   final String time;
   final String subtitle;
-  final int upvotes;
+  final int initialUpvotes;
+  final File? imageFile; // For non-web
+  final Uint8List? imageBytes; // For web
+  final List<String>? pollOptions; // Added for poll feature
+  final int? pollEndsInDays; // Added for poll feature
 
   const _PostCard({
     required this.username,
     required this.title,
     required this.time,
     this.subtitle = '',
-    this.upvotes = 0,
+    this.initialUpvotes = 0,
+    this.imageFile,
+    this.imageBytes,
+    this.pollOptions, // Initialize
+    this.pollEndsInDays, // Initialize
   });
 
   @override
+  State<_PostCard> createState() => _PostCardState();
+}
+
+class _PostCardState extends State<_PostCard> {
+  late int _currentUpvotes;
+  _VoteStatus _voteStatus = _VoteStatus.none; // Track the user's vote status
+  int? _selectedPollOptionIndex; // Track the selected poll option
+
+  @override
+  void initState() {
+    super.initState();
+    _currentUpvotes = widget.initialUpvotes;
+  }
+
+  void _upvote() {
+    setState(() {
+      if (_voteStatus == _VoteStatus.none) {
+        _currentUpvotes++;
+        _voteStatus = _VoteStatus.upvoted;
+      } else if (_voteStatus == _VoteStatus.downvoted) {
+        _currentUpvotes += 2; // Revert downvote (-1) and add upvote (+1)
+        _voteStatus = _VoteStatus.upvoted;
+      } else if (_voteStatus == _VoteStatus.upvoted) {
+        _currentUpvotes--; // Un-upvote
+        _voteStatus = _VoteStatus.none;
+      }
+    });
+  }
+
+  void _downvote() {
+    setState(() {
+      if (_voteStatus == _VoteStatus.none) {
+        _currentUpvotes--;
+        _voteStatus = _VoteStatus.downvoted;
+      } else if (_voteStatus == _VoteStatus.upvoted) {
+        _currentUpvotes -= 2; // Revert upvote (+1) and add downvote (-1)
+        _voteStatus = _VoteStatus.downvoted;
+      } else if (_voteStatus == _VoteStatus.downvoted) {
+        _currentUpvotes++; // Un-downvote
+        _voteStatus = _VoteStatus.none;
+      }
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
+    // Determine arrow colors based on vote status
+    Color upArrowColor = _voteStatus == _VoteStatus.upvoted ? Colors.red : Colors.black;
+    Color downArrowColor = _voteStatus == _VoteStatus.downvoted ? Colors.red : Colors.black;
+
+    final bool isPollPost = widget.pollOptions != null && widget.pollOptions!.isNotEmpty;
+
     return Card(
       elevation: 2,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -319,17 +294,55 @@ class _PostCard extends StatelessWidget {
           children: [
             // Post title
             Text(
-              title,
+              widget.title,
               style: Theme.of(context).textTheme.titleMedium?.copyWith(
                     fontWeight: FontWeight.bold,
                   ),
             ),
             const SizedBox(height: 8),
 
-            // Optional subtitle
-            if (subtitle.isNotEmpty)
+            // Display image if available
+            if (widget.imageFile != null || widget.imageBytes != null)
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 8.0),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(8.0),
+                  child: kIsWeb && widget.imageBytes != null
+                      ? Image.memory(
+                          widget.imageBytes!,
+                          fit: BoxFit.cover,
+                          width: double.infinity,
+                          height: 200,
+                        )
+                      : Image.file(
+                          widget.imageFile!,
+                          fit: BoxFit.cover,
+                          width: double.infinity,
+                          height: 200,
+                        ),
+                ),
+              ),
+
+            // Display poll if available
+            if (isPollPost)
+              _PollDisplay(
+                options: widget.pollOptions!,
+                pollEndsInDays: widget.pollEndsInDays,
+                selectedOptionIndex: _selectedPollOptionIndex,
+                onOptionSelected: (index) {
+                  setState(() {
+                    _selectedPollOptionIndex = index;
+                    // You might want to add logic here to actually record the vote
+                    // and disable further voting on the poll.
+                  });
+                },
+              ),
+
+
+            // Optional subtitle (the post body)
+            if (widget.subtitle.isNotEmpty)
               Text(
-                subtitle,
+                widget.subtitle,
                 style: Theme.of(context).textTheme.bodyMedium,
               ),
 
@@ -340,13 +353,13 @@ class _PostCard extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  username,
+                  widget.username,
                   style: TextStyle(
                       fontWeight: FontWeight.w500,
                       color: Colors.grey.shade700),
                 ),
                 Text(
-                  time,
+                  widget.time,
                   style: TextStyle(color: Colors.grey.shade500),
                 ),
               ],
@@ -360,11 +373,25 @@ class _PostCard extends StatelessWidget {
               children: [
                 Row(
                   children: [
-                    const Icon(Icons.arrow_upward, size: 16),
+                    GestureDetector(
+                      onTap: _upvote,
+                      child: Icon(
+                        Icons.arrow_upward,
+                        size: 16,
+                        color: upArrowColor, // Use dynamic color
+                      ),
+                    ),
                     const SizedBox(width: 4),
-                    Text('$upvotes'),
+                    Text('$_currentUpvotes'),
                     const SizedBox(width: 4),
-                    const Icon(Icons.arrow_downward, size: 16),
+                    GestureDetector(
+                      onTap: _downvote,
+                      child: Icon(
+                        Icons.arrow_downward,
+                        size: 16,
+                        color: downArrowColor, // Use dynamic color
+                      ),
+                    ),
                   ],
                 ),
                 const Row(
@@ -387,6 +414,80 @@ class _PostCard extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+}
+
+class _PollDisplay extends StatelessWidget {
+  final List<String> options;
+  final int? pollEndsInDays;
+  final int? selectedOptionIndex;
+  final ValueChanged<int> onOptionSelected;
+
+  const _PollDisplay({
+    required this.options,
+    required this.pollEndsInDays,
+    this.selectedOptionIndex,
+    required this.onOptionSelected,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        if (pollEndsInDays != null)
+          Padding(
+            padding: const EdgeInsets.only(bottom: 8.0),
+            child: Text(
+              'Poll ends in $pollEndsInDays day${pollEndsInDays! > 1 ? 's' : ''}',
+              style: TextStyle(color: Colors.grey[700], fontSize: 13),
+            ),
+          ),
+        ListView.builder(
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(), // Disable scrolling for nested list
+          itemCount: options.length,
+          itemBuilder: (context, index) {
+            final bool isSelected = selectedOptionIndex == index;
+            return GestureDetector(
+              onTap: () => onOptionSelected(index),
+              child: Container(
+                margin: const EdgeInsets.symmetric(vertical: 4),
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                decoration: BoxDecoration(
+                  color: isSelected ? Colors.red.withOpacity(0.1) : Colors.grey[200],
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(
+                    color: isSelected ? Colors.red : Colors.grey[300]!,
+                    width: 1.5,
+                  ),
+                ),
+                child: Row(
+                  children: [
+                    Icon(
+                      isSelected ? Icons.check_circle : Icons.radio_button_off,
+                      color: isSelected ? Colors.red : Colors.grey[600],
+                      size: 20,
+                    ),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: Text(
+                        options[index],
+                        style: TextStyle(
+                          color: isSelected ? Colors.red : Colors.black,
+                          fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          },
+        ),
+        const SizedBox(height: 12),
+      ],
     );
   }
 }

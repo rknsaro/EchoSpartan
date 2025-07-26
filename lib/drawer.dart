@@ -248,7 +248,7 @@ class _AppDrawerState extends State<AppDrawer> {
                           );
                         },
                         style: TextButton.styleFrom(
-                          backgroundColor: Colors.red,      
+                          backgroundColor: const Color(0xFFB00000),   
                           foregroundColor: Colors.white,     
                           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                         ),

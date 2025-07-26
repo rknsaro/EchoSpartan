@@ -14,6 +14,24 @@ class _LoginScreenState extends State<LoginScreen> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   bool _rememberMe = false;
+  bool _obscurePassword = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadRememberMe();
+  }
+
+  Future<void> _loadRememberMe() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    setState(() {
+      _rememberMe = prefs.getBool('rememberMe') ?? false;
+      if (_rememberMe) {
+        _emailController.text = prefs.getString('email') ?? '';
+        _passwordController.text = prefs.getString('password') ?? '';
+      }
+    });
+  }
 
   Future<void> _handleLogin() async {
     if (_formKey.currentState!.validate()) {
@@ -26,10 +44,14 @@ class _LoginScreenState extends State<LoginScreen> {
           password: password,
         );
 
+        SharedPreferences prefs = await SharedPreferences.getInstance();
+        await prefs.setBool('rememberMe', _rememberMe);
         if (_rememberMe) {
-          SharedPreferences prefs = await SharedPreferences.getInstance();
           await prefs.setString('email', email);
           await prefs.setString('password', password);
+        } else {
+          await prefs.remove('email');
+          await prefs.remove('password');
         }
 
         ScaffoldMessenger.of(context).showSnackBar(
@@ -54,7 +76,7 @@ class _LoginScreenState extends State<LoginScreen> {
     }
   }
 
-   @override
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFB00000),
@@ -68,30 +90,57 @@ class _LoginScreenState extends State<LoginScreen> {
               const SizedBox(height: 12),
               const Text(
                 'EchoSpartan',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.w500, color: Colors.white),
-              ),
-              const SizedBox(height: 30),
-              const Text(
-                'Welcome\nRed Spartans!',
-                textAlign: TextAlign.center,
-                style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.white),
+                style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w500,
+                    color: Colors.white),
               ),
               const SizedBox(height: 30),
               Card(
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16)),
                 elevation: 8,
+                margin: const EdgeInsets.symmetric(horizontal: 0),
                 child: Padding(
                   padding: const EdgeInsets.all(20.0),
                   child: Form(
                     key: _formKey,
                     child: Column(
                       children: [
+                        // Welcome and Red Spartans! text inside the Card
+                        const Text(
+                          'Welcome',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.normal),
+                        ),
+                        const Text(
+                          'Red Spartans!',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                              fontSize: 22,
+                              fontWeight: FontWeight.bold,
+                              color: Color(0xFFB00000)), 
+                        ),
+                        const SizedBox(height: 20), 
+                        // Email Text Field
                         TextFormField(
                           controller: _emailController,
                           keyboardType: TextInputType.emailAddress,
-                          decoration: const InputDecoration(
+                          decoration: InputDecoration(
                             labelText: 'Email',
-                            prefixIcon: Icon(Icons.email),
+                            labelStyle: TextStyle(color: Colors.grey[700]),
+                            filled: true,
+                            fillColor: Colors.white,
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(8),
+                              borderSide: BorderSide.none,
+                            ),
+                            focusedBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(8),
+                              borderSide: const BorderSide(color: Color(0xFFB00000), width: 2.0),
+                            ),
                           ),
                           validator: (value) {
                             if (value == null || value.isEmpty) {
@@ -103,15 +152,40 @@ class _LoginScreenState extends State<LoginScreen> {
                           },
                         ),
                         const SizedBox(height: 16),
+                        // Password Text Field
                         TextFormField(
                           controller: _passwordController,
-                          obscureText: true,
-                          decoration: const InputDecoration(
+                          obscureText: _obscurePassword,
+                          decoration: InputDecoration(
                             labelText: 'Password',
-                            prefixIcon: Icon(Icons.lock),
+                            labelStyle: TextStyle(color: Colors.grey[700]),
+                            filled: true,
+                            fillColor: Colors.white,
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(8),
+                              borderSide: BorderSide.none,
+                            ),
+                            focusedBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(8),
+                              borderSide: const BorderSide(color: Color(0xFFB00000), width: 2.0),
+                            ),
+                            suffixIcon: IconButton(
+                              icon: Icon(
+                                _obscurePassword
+                                    ? Icons.visibility_off
+                                    : Icons.visibility,
+                                color: Colors.grey,
+                              ),
+                              onPressed: () {
+                                setState(() {
+                                  _obscurePassword = !_obscurePassword;
+                                });
+                              },
+                            ),
                           ),
-                          validator: (value) =>
-                              value == null || value.isEmpty ? 'Password is required' : null,
+                          validator: (value) => value == null || value.isEmpty
+                              ? 'Password is required'
+                              : null,
                         ),
                         const SizedBox(height: 10),
                         Row(
@@ -126,13 +200,23 @@ class _LoginScreenState extends State<LoginScreen> {
                                       _rememberMe = value!;
                                     });
                                   },
+                                  activeColor: const Color(0xFFB00000), // Red checkbox
                                 ),
-                                const Text('Remember me'),
+                                const Text(
+                                  'Remember me',
+                                  style: TextStyle(color: Colors.black54),
+                                ),
                               ],
                             ),
                             TextButton(
-                              onPressed: () {},
-                              child: const Text('Forgot Password?'),
+                              onPressed: () {
+                                // TODO: Implement Forgot Password logic
+                              },
+                              child: const Text(
+                                'Forgot Password?',
+                                style: TextStyle(
+                                    color: Color(0xFFB00000)),
+                              ),
                             ),
                           ],
                         ),
@@ -141,16 +225,21 @@ class _LoginScreenState extends State<LoginScreen> {
                           width: double.infinity,
                           child: ElevatedButton(
                             style: ElevatedButton.styleFrom(
-                              backgroundColor: const Color(0xFFB00000),
+                              backgroundColor:
+                                  const Color(0xFFB00000), 
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(30),
                               ),
                               padding: const EdgeInsets.symmetric(vertical: 14),
+                              elevation: 5,
                             ),
                             onPressed: _handleLogin,
                             child: const Text(
                               'Log In',
-                              style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
+                              style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.white,
+                                  fontSize: 18), 
                             ),
                           ),
                         ),
@@ -158,12 +247,21 @@ class _LoginScreenState extends State<LoginScreen> {
                         Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            const Text("Don't have an Account?"),
+                            const Text(
+                              "Don't have an Account?",
+                              style: TextStyle(color: Colors.black54),
+                            ),
                             TextButton(
                               onPressed: () {
-                                Navigator.pushReplacementNamed(context, '/signup');
+                                Navigator.pushReplacementNamed(
+                                    context, '/signup');
                               },
-                              child: const Text('Sign up.'),
+                              child: const Text(
+                                'Sign up.',
+                                style: TextStyle(
+                                    color: Color(0xFFB00000)),
+                              ),
+                              
                             ),
                           ],
                         ),
