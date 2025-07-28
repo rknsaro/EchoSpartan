@@ -1,24 +1,24 @@
 import 'package:flutter/material.dart';
 import 'package:try_1/drawer.dart';
-import 'package:try_1/search_screen.dart';
-import 'package:try_1/discussions_page.dart';
-import 'package:try_1/top_forums_page.dart';
-import 'package:try_1/communities_page.dart';
-import 'package:try_1/campus_announcements_page.dart';
+// Remove imports for SearchScreen, MessagesScreen, ProfileScreen as they are now top-level
+import 'package:try_1/search_screen.dart'; // REMOVE
+import 'package:try_1/discussions_page.dart'; // KEEP
+import 'package:try_1/top_forums_page.dart'; // KEEP
+import 'package:try_1/communities_page.dart'; // KEEP
+import 'package:try_1/campus_announcements_page.dart'; // KEEP
 import 'package:try_1/create_post_card.dart';
 import 'dart:io';
 import 'dart:typed_data';
 import 'package:flutter/foundation.dart' show kIsWeb;
 
-
+// These lists are likely used by SearchScreen, they can stay global if needed by other files
 List<String> allAppContacts = [
   'John Doe', 'Jane Smith', 'Alice Johnson', 'Bob Williams',
   'Charlie Brown', 'Diana Prince', 'Bruce Wayne', 'Clark Kent',
 ];
 
 List<String> allAppChannels = [
-  'Class BFA-4102', 'Study Buddies', 'Drama Club', 'Sports Enthusiasts',
-  'Coding Challenges', 'Book Lovers', 'Gaming Hub', 'Art & Design Forum',
+  'Class SM-4102',
 ];
 
 class NewsFeedScreen extends StatefulWidget {
@@ -32,6 +32,7 @@ class NewsFeedScreen extends StatefulWidget {
 
 class _NewsFeedScreenState extends State<NewsFeedScreen> with SingleTickerProviderStateMixin {
   late TabController _tabController;
+  // int _selectedBottomNavBarIndex = 0; // REMOVE: Managed by HomeScreenContainer
 
   @override
   void initState() {
@@ -61,6 +62,7 @@ class _NewsFeedScreenState extends State<NewsFeedScreen> with SingleTickerProvid
         ),
         title: GestureDetector(
           onTap: () {
+            // This search bar tap will still navigate to SearchScreen
             Navigator.push(
               context,
               MaterialPageRoute(
@@ -112,7 +114,8 @@ class _NewsFeedScreenState extends State<NewsFeedScreen> with SingleTickerProvid
       ),
       body: TabBarView(
         controller: _tabController,
-        children: const [
+        // The children here are the content for each tab within the Newsfeed screen
+        children: [
           _DefaultNewsfeedContent(),
           DiscussionsPage(),
           TopForumsPage(),
@@ -124,6 +127,7 @@ class _NewsFeedScreenState extends State<NewsFeedScreen> with SingleTickerProvid
   }
 }
 
+// Keep _DefaultNewsfeedContent as is, as it manages the actual posts
 class _DefaultNewsfeedContent extends StatefulWidget {
   const _DefaultNewsfeedContent();
 
@@ -182,6 +186,7 @@ class _DefaultNewsfeedContentState extends State<_DefaultNewsfeedContent> {
   Widget build(BuildContext context) {
     return Column(
       children: [
+
         CreatePostCard(onPostCreated: _addNewPost),
         Expanded(
           child: ListView.builder(
@@ -202,11 +207,10 @@ class _DefaultNewsfeedContentState extends State<_DefaultNewsfeedContent> {
   }
 }
 
-// Define an enum to represent the user's vote status for a post
 enum _VoteStatus {
-  none,       
-  upvoted,    
-  downvoted,  
+  none,
+  upvoted,
+  downvoted,
 }
 
 class _PostCard extends StatefulWidget {
@@ -215,10 +219,10 @@ class _PostCard extends StatefulWidget {
   final String time;
   final String subtitle;
   final int initialUpvotes;
-  final File? imageFile; // For non-web
-  final Uint8List? imageBytes; // For web
-  final List<String>? pollOptions; // Added for poll feature
-  final int? pollEndsInDays; // Added for poll feature
+  final File? imageFile; 
+  final Uint8List? imageBytes; 
+  final List<String>? pollOptions;
+  final int? pollEndsInDays; 
 
   const _PostCard({
     required this.username,
@@ -228,8 +232,8 @@ class _PostCard extends StatefulWidget {
     this.initialUpvotes = 0,
     this.imageFile,
     this.imageBytes,
-    this.pollOptions, // Initialize
-    this.pollEndsInDays, // Initialize
+    this.pollOptions, 
+    this.pollEndsInDays, 
   });
 
   @override
@@ -238,8 +242,8 @@ class _PostCard extends StatefulWidget {
 
 class _PostCardState extends State<_PostCard> {
   late int _currentUpvotes;
-  _VoteStatus _voteStatus = _VoteStatus.none; // Track the user's vote status
-  int? _selectedPollOptionIndex; // Track the selected poll option
+  _VoteStatus _voteStatus = _VoteStatus.none; 
+  int? _selectedPollOptionIndex; 
 
   @override
   void initState() {
@@ -253,10 +257,10 @@ class _PostCardState extends State<_PostCard> {
         _currentUpvotes++;
         _voteStatus = _VoteStatus.upvoted;
       } else if (_voteStatus == _VoteStatus.downvoted) {
-        _currentUpvotes += 2; // Revert downvote (-1) and add upvote (+1)
+        _currentUpvotes += 2; 
         _voteStatus = _VoteStatus.upvoted;
       } else if (_voteStatus == _VoteStatus.upvoted) {
-        _currentUpvotes--; // Un-upvote
+        _currentUpvotes--;
         _voteStatus = _VoteStatus.none;
       }
     });
@@ -268,10 +272,10 @@ class _PostCardState extends State<_PostCard> {
         _currentUpvotes--;
         _voteStatus = _VoteStatus.downvoted;
       } else if (_voteStatus == _VoteStatus.upvoted) {
-        _currentUpvotes -= 2; // Revert upvote (+1) and add downvote (-1)
+        _currentUpvotes -= 2; 
         _voteStatus = _VoteStatus.downvoted;
       } else if (_voteStatus == _VoteStatus.downvoted) {
-        _currentUpvotes++; // Un-downvote
+        _currentUpvotes++; 
         _voteStatus = _VoteStatus.none;
       }
     });
@@ -279,7 +283,6 @@ class _PostCardState extends State<_PostCard> {
 
   @override
   Widget build(BuildContext context) {
-    // Determine arrow colors based on vote status
     Color upArrowColor = _voteStatus == _VoteStatus.upvoted ? Colors.red : Colors.black;
     Color downArrowColor = _voteStatus == _VoteStatus.downvoted ? Colors.red : Colors.black;
 
@@ -336,7 +339,6 @@ class _PostCardState extends State<_PostCard> {
                   });
                 },
               ),
-
 
             // Optional subtitle (the post body)
             if (widget.subtitle.isNotEmpty)

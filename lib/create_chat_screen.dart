@@ -131,7 +131,7 @@ class _CreateChatPageState extends State<CreateChatPage> {
 
   void _addNewContact() {
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Add new contact tapped')),
+      const SnackBar(content: Text('Add new channel tapped')),
     );
   }
 
@@ -188,7 +188,7 @@ class _CreateChatPageState extends State<CreateChatPage> {
                 ElevatedButton.icon(
                   onPressed: _addNewContact,
                   icon: const Icon(Icons.person_add),
-                  label: const Text('Add Contact'),
+                  label: const Text('New Channel'),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFFB00000),
                     foregroundColor: Colors.white,

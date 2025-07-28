@@ -26,7 +26,9 @@ class Contact {
 }
 
 class MessagesPage extends StatefulWidget {
-  const MessagesPage({super.key});
+  final VoidCallback? onBackToHome;  // Callback for back button
+
+  const MessagesPage({super.key, this.onBackToHome});
 
   @override
   State<MessagesPage> createState() => _MessagesPageState();
@@ -42,7 +44,7 @@ class _MessagesPageState extends State<MessagesPage> {
   List<Contact> _filteredSuggestedContacts = [];
 
   final List<Map<String, String>> _allChannels = [
-    {'name': 'Class SM-4102', 'description': 'Lorem ipsum dolor sit amet, consectetur adipiscing elit.', 'time': '10:00 AM'},
+    {'name': 'Class SM-4102', 'description': 'hello ! we’re hiring encoder po! no registration fee, hawak mo oras mo, dollar rate, daily payout! if interested just kindly message me lang po!', 'time': '1:11 PM'},
   ];
   List<Map<String, String>> _filteredChannels = [];
 
@@ -209,7 +211,13 @@ class _MessagesPageState extends State<MessagesPage> {
         ),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.white),
-          onPressed: () => Navigator.pop(context),
+          onPressed: () {
+            if (widget.onBackToHome != null) {
+              widget.onBackToHome!();
+            } else {
+              Navigator.pop(context);
+            }
+          },
         ),
         centerTitle: true,
       ),
@@ -296,19 +304,17 @@ class _MessagesPageState extends State<MessagesPage> {
                                   subtitle: Text(channel['description']!),
                                   trailing: Text(channel['time']!),
                                   onTap: () {
-                                  if (channel['name'] == 'Class SM-4102') {
-                                    Navigator.push(
-                                      context,
-                                      MaterialPageRoute(builder: (context) => const ClassChatScreen()),
-                                    );
-                                  } else {
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      SnackBar(content: Text('Tapped on channel: ${channel['name']}')),
-                                    );
-                                  }
-                                },
-
-
+                                    if (channel['name'] == 'Class SM-4102') {
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(builder: (context) => const ClassChatScreen()),
+                                      );
+                                    } else {
+                                      ScaffoldMessenger.of(context).showSnackBar(
+                                        SnackBar(content: Text('Tapped on channel: ${channel['name']}')),
+                                      );
+                                    }
+                                  },
                                 ),
                                 const Divider(height: 1, indent: 72, endIndent: 16),
                               ],

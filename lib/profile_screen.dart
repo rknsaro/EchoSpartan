@@ -1,19 +1,42 @@
 import 'package:flutter/material.dart';
+import 'editprof_details.dart';
+import 'profile_data.dart'; 
 
-void main() {
-  runApp(MaterialApp(
-    debugShowCheckedModeBanner: false,
-    initialRoute: '/profile',
-    routes: {
-      '/profile': (context) => const ProfilePage(),
-      '/messages': (context) => const MessagesPage(),
-      '/class-chat': (context) => const ClassChatPage(),
-    },
-  ));
+class ProfilePage extends StatefulWidget {
+  const ProfilePage({super.key});
+
+  @override
+  State<ProfilePage> createState() => _ProfilePageState();
 }
 
-class ProfilePage extends StatelessWidget {
-  const ProfilePage({super.key});
+class _ProfilePageState extends State<ProfilePage> {
+  String _name = "Samuel Garcia";
+  String _course = "Bachelor of Science in Information Technology";
+  String _major = "Major in Service Management";
+  String _bio = "";
+
+  // Function to navigate to edit page and receive result
+  void _editProfileDetails() async {
+    final updatedData = await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => EditProfDetailsPage(
+          initialName: _name,
+          initialCourse: "$_course $_major", 
+          initialBio: _bio,
+        ),
+      ),
+    );
+
+    if (updatedData != null && updatedData is ProfileData) {
+      setState(() {
+        _name = updatedData.name;
+        _course = updatedData.course;
+        _major = "";
+        _bio = updatedData.bio;
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -44,6 +67,7 @@ class ProfilePage extends StatelessWidget {
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
                 border: Border.all(color: const Color.fromARGB(255, 175, 1, 1)),
+                borderRadius: BorderRadius.circular(5),
               ),
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -52,35 +76,42 @@ class ProfilePage extends StatelessWidget {
                     flex: 2,
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
-                      children: const [
-                        Text("Mark", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                        SizedBox(height: 5),
-                        Text("BFA-4102"),
-                        Text("Bachelor of Fine Arts"),
-                        Text("Major in Visual Communication"),
-                        SizedBox(height: 10),
-                        Text("Bio:", style: TextStyle(fontWeight: FontWeight.bold)),
-                        SizedBox(height: 40),
+                      children: [
+                        Text(_name, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)), // Use state variable
+                        const SizedBox(height: 5),
+                        Text(_course),
+                        if (_major.isNotEmpty) Text(_major),
+                        const SizedBox(height: 10),
+                        const Text("Bio:", style: TextStyle(fontWeight: FontWeight.bold)),
+                        Text(_bio),
+                        const SizedBox(height: 40),
                       ],
                     ),
                   ),
                   const SizedBox(width: 8),
                   Expanded(
                     flex: 1,
-                    child: Stack(
+                    child: Column( 
                       children: [
                         Container(
                           height: 120,
-                          color: Colors.grey[200],
-                          child: const Center(child: Text("IMAGE HERE")),
+                          decoration: BoxDecoration(
+                            border: Border.all(color: Colors.red),
+                          ),
+                          child: Image.asset(
+                            'assets/profile2.jpeg',
+                            fit: BoxFit.cover,
+                          ),
                         ),
-                        const Positioned(
-                          bottom: 4,
-                          right: 4,
-                          child: CircleAvatar(
-                            radius: 14,
-                            backgroundColor: Colors.red,
-                            child: Icon(Icons.edit, color: Colors.white, size: 16),
+                        const SizedBox(height: 8), 
+                        GestureDetector(
+                          onTap: _editProfileDetails,
+                          child: const Text(
+                            "Edit Details",
+                            style: TextStyle(
+                              color: Colors.black,
+                              fontWeight: FontWeight.bold, 
+                            ),
                           ),
                         ),
                       ],
@@ -99,12 +130,14 @@ class ProfilePage extends StatelessWidget {
                     padding: const EdgeInsets.all(8),
                     decoration: BoxDecoration(
                       border: Border.all(color: Colors.red),
+                      borderRadius: BorderRadius.circular(5),
                     ),
                     child: Column(
                       children: [
                         Wrap(
-                          spacing: 10,
-                          runSpacing: 10,
+                          spacing: 15.0,
+                          runSpacing: 10.0,
+                          alignment: WrapAlignment.start,
                           children: [
                             friendBox("Jemina"),
                             friendBox("Rachel"),
@@ -116,12 +149,15 @@ class ProfilePage extends StatelessWidget {
                         ),
                         const SizedBox(height: 10),
                         const Divider(),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: const [
-                            Text("View all", style: TextStyle(fontWeight: FontWeight.w500)),
-                            Text("Edit Featured Friends", style: TextStyle(fontWeight: FontWeight.w500)),
-                          ],
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 4.0),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: const [
+                              Text("View all", style: TextStyle(fontWeight: FontWeight.w500)),
+                              Text("Edit Featured Friends", style: TextStyle(fontWeight: FontWeight.w500)),
+                            ],
+                          ),
                         ),
                       ],
                     ),
@@ -135,13 +171,14 @@ class ProfilePage extends StatelessWidget {
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
                       border: Border.all(color: Colors.red),
+                      borderRadius: BorderRadius.circular(5),
                     ),
                     child: const Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text("10 --- Friend requests"),
+                        Text("10 Friend requests"),
                         SizedBox(height: 10),
-                        Text("214 --- Recent Views"),
+                        Text("214 Recent Views"),
                       ],
                     ),
                   ),
@@ -150,12 +187,16 @@ class ProfilePage extends StatelessWidget {
             ),
             const SizedBox(height: 15),
             Container(
-              height: 100,
+              height: 150,
               width: double.infinity,
               decoration: BoxDecoration(
                 border: Border.all(color: Colors.red),
+                borderRadius: BorderRadius.circular(5),
               ),
-              child: const Center(child: Text("IMAGE HERE")),
+              child: Image.asset(
+                'assets/ghibli.jpeg',
+                fit: BoxFit.cover,
+              ),
             ),
           ],
         ),
@@ -164,80 +205,26 @@ class ProfilePage extends StatelessWidget {
   }
 
   Widget friendBox(String name) {
-    return Column(
-      children: [
-        Container(
-          width: 55,
-          height: 55,
-          decoration: BoxDecoration(
-            border: Border.all(color: Colors.red),
+    return SizedBox(
+      width: 75,
+      child: Column(
+        children: [
+          Container(
+            width: 55,
+            height: 55,
+            decoration: BoxDecoration(
+              border: Border.all(color: Colors.red),
+              shape: BoxShape.rectangle,
+            ),
+            child: Image.asset(
+              'assets/profile_red.png',
+              fit: BoxFit.cover,
+            ),
           ),
-        ),
-        const SizedBox(height: 4),
-        Text(name, style: const TextStyle(fontSize: 12)),
-      ],
-    );
-  }
-}
-
-class MessagesPage extends StatelessWidget {
-  const MessagesPage({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        backgroundColor: const Color(0xFFB00000),
-        centerTitle: true,
-        iconTheme: const IconThemeData(color: Colors.white),
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () => Navigator.pop(context),
-        ),
-        title: const Text(
-          'Messages',
-          style: TextStyle(
-            color: Colors.white,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
+          const SizedBox(height: 4),
+          Text(name, style: const TextStyle(fontSize: 12), textAlign: TextAlign.center),
+        ],
       ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: const [
-            Icon(Icons.mood_bad, size: 80, color: Color(0xFFB00000)),
-            SizedBox(height: 16),
-            Text("No messages in your Inbox", style: TextStyle(fontSize: 14, color: Colors.black87)),
-            Text("Break the ice and send the first message", style: TextStyle(fontSize: 14, color: Colors.black87)),
-          ],
-        ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        backgroundColor: const Color(0xFFB00000),
-        onPressed: () {},
-        shape: const CircleBorder(),
-        child: const Icon(Icons.add, color: Colors.white),
-      ),
-    );
-  }
-}
-
-class ClassChatPage extends StatelessWidget {
-  const ClassChatPage({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text("Class Chat"),
-        backgroundColor: const Color(0xFFB00000),
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () => Navigator.pop(context),
-        ),
-      ),
-      body: const Center(child: Text("Class Chat Page")),
     );
   }
 }

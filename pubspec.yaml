@@ -77,6 +77,14 @@ flutter:
     - assets/watdahelly.jpeg
     - assets/thesis_stress.jpeg
     - assets/siomai_rice.jpeg
+    - assets/search_red.png
+    - assets/home_red.png
+    - assets/create_red.png
+    - assets/cancel_red.png
+    - assets/messages_red.png
+    - assets/profile_red.png
+    - assets/ghibli.jpeg
+    - assets/profile2.jpeg
 
   # To add assets to your application, add an assets section, like this:
   # assets:
